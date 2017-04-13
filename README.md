@@ -1,5 +1,5 @@
-<b><i>IA64_TSC_LNX</i> : Intel Core 64-bit Architecture Time Stamp Counter (TSC) Library for Linux</b>
-========================================================================================
+<b><i><small>IA64_TSC_LNX</i> : Intel Core 64-bit Architecture Time Stamp Counter (TSC) Library for Linux</small></b>
+===
 <pre>
   Version    : 1.0.0a  
   Author     : Jason Vas Dias<jason.vas.dias@gmail.com>  
