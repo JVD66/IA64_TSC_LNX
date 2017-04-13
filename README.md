@@ -1,4 +1,4 @@
-#IA64_TSC_LNX : Intel Core 64-bit Architecture Time Stamp Counter (TSC) Library for Linux  
+IA64_TSC_LNX : Intel Core 64-bit Architecture Time Stamp Counter (TSC) Library for Linux  
   Version    : 1.0.0a  
   Author     : Jason Vas Dias<jason.vas.dias@gmail.com>  
  Provides    :  
@@ -20,8 +20,9 @@
     // IFF the above function returns true, then these functions return  
     // the Time Stamp Counter value:  
     U64_t IA64_rdtscp();  /* cancellation point */  
-    U64_t IA64_rdtsc();   /* not cancellation point : do not use outside assembler where you control  
-                             processor pipelining & speculative branch prediction  
+    U64_t IA64_rdtsc();   /* not cancellation point : do not use outside assembler  
+                           * where you control processor pipelining & speculative  
+                           * branch prediction  
                            */
                            
     
