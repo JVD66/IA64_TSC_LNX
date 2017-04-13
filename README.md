@@ -35,6 +35,30 @@ Time Stamp Counter (TSC) Library for Linux
  <pre>
 </ul>
 
+Demonstration :
+<pre>
+  $ make
+  $ ./ttsc1
+max_extended_leaf: 80000008
+has tsc: 1 constant: 1
+Invariant TSC is enabled: Actual TSC freq: 2.893299GHz - TSC adjust: 1.
+ts2 - ts1: 219 ts3 - ts2: 107 ns1: 0.000000334 ns2: 0.000001955
+ts3 - ts2: 132 ns1: 0.000000329
+ts3 - ts2: 15 ns1: 0.000000323
+ts3 - ts2: 17 ns1: 0.000000372
+ts3 - ts2: 17 ns1: 0.000000319
+ts3 - ts2: 17 ns1: 0.000000351
+ts3 - ts2: 17 ns1: 0.000000342
+ts3 - ts2: 17 ns1: 0.000000350
+ts3 - ts2: 17 ns1: 0.000000358
+ts3 - ts2: 17 ns1: 0.000000347
+ts3 - ts2: 17 ns1: 0.000000319
+t1 - t0: 46223 - ns2: 0.000047863
+</pre>
+
+The numbers on the right (shown as ns1) are the delta of the results clock_gettime(CLOCK_MONOTONIC_RAW(), &tsp),
+those on the left (shown as 'ts3 - ts2') are the delta of the  results of IA64_s_ns_since_start() which uses IA64_rdtscp() .
+
 <b>READERS PLEASE NOTE</b> :
 
 <b><i>THIS PACKAGE IS NOT YET READY</i></b> .  I am creating the GIT today (2017-04-15) which
@@ -46,6 +70,7 @@ This message will disappear in a few days when the project should be considered
 
 I would make this GIT private during this period, but I don't want to pay
 a monthly fee for this.
+
 
 
 
