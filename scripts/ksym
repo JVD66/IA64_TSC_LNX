@@ -1,0 +1,67 @@
+#!/usr/bin/bash
+function ksym()
+# prints address & value in running kernel of first kernel symbol with name beginning with 1st argument, which must
+# name an integer of size 2nd argument, being a global kernel symbol listed in /proc/kallsyms, by looking up its value in /proc/kcore with objdump.
+# The kernel is the only program one is able to do this with (unless one has a core dump file of a running process handy), so why not use it!
+{ if (( $# < 2 )); then
+     echo "$FUNCNAME: expects 2 arguments <kernel integer symbol name> <size: must be one of 1 , 2 , 4, or 8> ."$'\n\t''Will print the value of the first matching integer (of size 2nd.arg) global symbol from the live kernel if a definition found in /proc/kallsyms.' >&2;
+     return 1; 
+  fi
+  local name="$1";
+  if [[ ! "$2" =~ ^[1-48]$ ]]; then
+     echo "$FUNCNAME: size must be one of 1 , 2 , 4, or 8 ." >&2;
+  fi
+  declare -i size="$2";
+  declare -a sym=($(sed -rn '/^[0-9A-Fa-f]+[[:space:]]+[bBdD][[:space:]]+'$1'/{s/^([0-9A-Fa-f]+)[[:space:]][bBdD][[:space:]]+([^[:space:]]+)$/\1 \2/;p;q}' < /proc/kallsyms));
+  if (( (${#sym[@]}==2) &&  (${#sym[0]} > 1)  && (${#sym[1]} > 0) )); then
+    declare -i end_addr='16#'${sym[0]}'+size';
+    local value=$(objdump  -M addr64 -s --start-address=0x${sym[0]} --stop-address=$end_addr /proc/kcore  |
+                      while read line; do
+                          if [[ "$line" =~ ^[[:space:]]*${sym[0]}[[:space:]]+([0-9A-Fa-f]{$((size<<1))})[[:space:]]?.*$ ]]; then
+                              echo -n "${BASH_REMATCH[1]}";
+                              break;
+                          fi
+                      done
+          );
+    if [[ "$value" =~ ([0-9A-Fa-f]{2}){$size} ]]; then
+        # the value is in address space order, ie. from low byte to high byte, so unlike in htonl LSB->MSB conversion,
+        # the hi/lo bytes & words are not swapped (as I would have thought they would be) - I think objdump must be doing this for us,
+        # since it knows the object at that address is aligned on a 4 byte boundary (or even that it is an integer?) & is doing dumping like od(1).
+        case "$size" in
+            (1)
+            ;;
+            (2) if [[ $value =~ ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2}) ]]; then
+                   value=${BASH_REMATCH[2]}${BASH_REMATCH[1]};
+                fi
+                ;;
+            (4) if [[ $value =~ ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2}) ]]; then
+                   value=${BASH_REMATCH[4]}${BASH_REMATCH[3]}${BASH_REMATCH[2]}${BASH_REMATCH[1]};
+                fi
+                ;;
+            (8) if [[ $value =~ ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2}) ]]; then
+                   value=${BASH_REMATCH[8]}${BASH_REMATCH[7]}${BASH_REMATCH[6]}${BASH_REMATCH[5]}${BASH_REMATCH[4]}${BASH_REMATCH[3]}${BASH_REMATCH[2]}${BASH_REMATCH[1]};
+                fi
+                ;;
+       esac
+       echo "${sym[0]} ${sym[1]} $value "$(printf "%u" $((16#$value)));
+    else
+       echo "$FUNCNAME: No Value for symbol ${sym[1]} at ${sym[0]}." >&2
+    fi
+ else
+   echo "$FUNCNAME: Symbol lookup failed." >&2;
+   return 1;
+ fi
+ if [ x = x$value ]; then
+    echo 'Oops, value conversion failed of symbol '${sym[1]}' at '${sym[0]}'.' >&2;
+    return 1;
+ fi
+ return 0; 
+}
+declare -i ksym_status=0;
+case "$0" in
+ (*${BASH_SOURCE})
+   ksym "$@";
+   ksym_status=$?;
+   ;;
+esac
+((ksym_status==0));

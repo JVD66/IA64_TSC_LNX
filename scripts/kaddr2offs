@@ -1,0 +1,29 @@
+#!/bin/bash
+# uses objdump /proc/kcore to map kernel address to <(block/page) number within file>'.'<offset>
+set -o pipefail;
+shopt -s lastpipe;
+function kaddr2offs()
+{  if (( $# == 0 )); then
+      echo "$FUNCNAME: expects <kernel address> argument.";
+   fi
+   local kaddr="$1";
+   local line;
+   (objdump -fh /proc/kcore) |
+      while read -rd $'\n\r' line ; do
+         if [[ "$line" =~ ^[[:space:]]*([0-9]+)[[:space:]]+([^[:space:]]+)[[:space:]]+([0-9A-Fa-f]+)[[:space:]]+([0-9A-Fa-f]+)[[:space:]]+([0-9A-Fa-f]+)[[:space:]]+([0-9A-Fa-f]+)[[:space:]]+([^[:space:]]+)[[:space:]]*$ ]]; then
+            local num=${BASH_REMATCH[1]} name=${BASH_REMATCH[2]} size=${BASH_REMATCH[3]} vma=${BASH_REMATCH[4]} lma=${BASH_REMATCH[5]} offs=${BASH_REMATCH[6]} align=${BASH_REMATCH[7]} ;
+            if vma2offset $kaddr $vma $size $offs 4096; then
+               return 0;
+            fi
+         fi      
+      done
+   return 1;
+}
+declare -i k2o_status=0;
+case "$0" in
+ (*$BASH_SOURCE)
+   kaddr2offs "$@";
+   ((k2o_status=$?));
+   ;;
+esac
+((k2o_status==0));
