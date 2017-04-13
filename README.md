@@ -32,6 +32,21 @@ Time Stamp Counter (TSC) Library for Linux
                            * where you control processor pipelining & speculative  
                            * branch prediction  
                            */
- <pre>                     
+ <pre>
 </ul>
+
+<b>READERS PLEASE NOTE</b> :
+
+<b><i>THIS PACKAGE IS NOT YET READY</i></b> .  I am creating the GIT today (2017-04-15) which
+is my first GitHub project , to see what facilities GitHub provides & plan how
+to structure build & repository .
+
+This message will disappear in a few days when the project should be considered
+'Ready For Download'.
+
+I would make this GIT private during this period, but I don't want to pay
+a monthly fee for this.
+
+
+
 
